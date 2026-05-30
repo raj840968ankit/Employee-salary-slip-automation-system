@@ -1,0 +1,4 @@
+employeeId,baseSalary,hra,allowances,deductions,month,year
+EMP001,45000,12000,5000,2500,January,2026
+EMP002,38000,9000,3500,1800,January,2026
+EMP003,42000,10000,4000,2200,January,2026
