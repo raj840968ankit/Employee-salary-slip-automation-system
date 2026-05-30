@@ -4,6 +4,11 @@ A simple MERN full-stack project for uploading employee master data and monthly 
 
 This project is intentionally beginner-friendly and assignment-focused. It does not include authentication, JWT, Redux, Docker, microservices, or complex payroll rules.
 
+## Live Deployment
+
+- Frontend: https://employee-salary-slip-automation-sys.vercel.app
+- Backend API: https://employee-salary-slip-automation-system.onrender.com
+
 ## Features
 
 - Upload employee master data from CSV, XLSX, or XLS files
@@ -100,6 +105,12 @@ VITE_API_URL=http://localhost:5000
 ```
 
 Open the frontend at `http://localhost:5173`.
+
+For Vercel deployment, `VITE_API_URL` must be your Render backend URL, for example:
+
+```env
+VITE_API_URL=https://employee-salary-slip-backend.onrender.com
+```
 
 ## Sample Files
 
@@ -296,6 +307,12 @@ CLIENT_URL=https://your-vercel-frontend-url.vercel.app
 
 7. Deploy and copy the Render backend URL.
 
+If you use both Vercel production and preview URLs, separate allowed frontend URLs with commas:
+
+```env
+CLIENT_URL=https://your-project.vercel.app,https://your-custom-domain.com
+```
+
 ### Frontend on Vercel
 
 1. Create a new Vercel project from the same GitHub repository.
@@ -321,6 +338,21 @@ VITE_API_URL=https://your-render-backend-url.onrender.com
 6. Deploy.
 7. Update backend `CLIENT_URL` in Render to the final Vercel URL.
 
+Important: Vite reads `VITE_API_URL` during build time. If you add or change it in Vercel after deployment, redeploy the frontend.
+
+## Common Deployment Issue
+
+If upload works locally but fails on Vercel:
+
+1. Open your deployed frontend in the browser.
+2. Press `F12` and go to the Network tab.
+3. Try uploading the CSV again.
+4. Check the request URL.
+
+If it says `http://localhost:5000`, Vercel does not have the correct `VITE_API_URL`, or the frontend was not redeployed after setting it.
+
+If it says your Render URL but fails with CORS, update Render's `CLIENT_URL` to exactly match your Vercel URL, including `https://`, then redeploy the backend.
+
 ## Screenshots
 
 Add screenshots here after running the project:
@@ -334,6 +366,8 @@ Add screenshots here after running the project:
 ## Notes
 
 - Gmail requires an app password for SMTP if two-factor authentication is enabled.
+- On Render, add `EMAIL_USER` and `EMAIL_PASS` in the service Environment tab. `EMAIL_PASS` should be a Gmail app password, not your normal Gmail password.
+- Backend request logs use Morgan and appear in the Render Logs tab.
 - Generated PDFs are saved inside `backend/generated-pdfs`.
 - Uploaded files are temporarily stored in `backend/uploads` and deleted after parsing.
 - Render free instances may sleep after inactivity, so the first request can be slow.

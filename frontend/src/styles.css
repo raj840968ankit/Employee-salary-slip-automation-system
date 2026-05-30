@@ -129,6 +129,47 @@ body {
   white-space: nowrap;
 }
 
+.global-loader {
+  position: fixed;
+  inset: auto 18px 18px auto;
+  z-index: 1050;
+  max-width: min(420px, calc(100vw - 36px));
+}
+
+.loader-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.22);
+  animation: riseIn 0.18s ease;
+}
+
+.loader-card strong {
+  display: block;
+  margin-bottom: 2px;
+}
+
+.loader-card p {
+  color: var(--muted);
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.loader-spinner {
+  width: 34px;
+  height: 34px;
+  border: 3px solid #d8dee9;
+  border-top-color: var(--accent);
+  border-radius: 999px;
+  animation: spin 0.8s linear infinite;
+}
+
 .page-title {
   margin-bottom: 20px;
 }
@@ -390,5 +431,11 @@ body {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }

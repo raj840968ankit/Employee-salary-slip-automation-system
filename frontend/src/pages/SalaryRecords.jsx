@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import AlertBox from "../components/AlertBox";
 import api, { apiBaseUrl } from "../services/api";
+import getApiErrorMessage from "../utils/errorMessage";
 
 const statusClass = (status) => {
   if (status === "Sent") return "status-sent";
@@ -32,7 +33,7 @@ function SalaryRecords() {
       setMessage("PDF generated successfully");
       await loadRecords();
     } catch (err) {
-      setError(err.response?.data?.message || "PDF generation failed");
+      setError(getApiErrorMessage(err, "PDF generation failed"));
     } finally {
       setLoadingId("");
     }
@@ -47,7 +48,7 @@ function SalaryRecords() {
       setMessage("Email sent successfully");
       await loadRecords();
     } catch (err) {
-      setError(err.response?.data?.message || "Email sending failed");
+      setError(getApiErrorMessage(err, "Email sending failed"));
     } finally {
       setLoadingId("");
     }

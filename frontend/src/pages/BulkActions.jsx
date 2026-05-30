@@ -2,6 +2,7 @@ import { useState } from "react";
 import { FileText, Send } from "lucide-react";
 import AlertBox from "../components/AlertBox";
 import api from "../services/api";
+import getApiErrorMessage from "../utils/errorMessage";
 
 function BulkActions() {
   const [loading, setLoading] = useState("");
@@ -21,7 +22,7 @@ function BulkActions() {
       setMessage(response.data.message);
       setResults(response.data.results || []);
     } catch (err) {
-      setError(err.response?.data?.message || "Bulk action failed");
+      setError(getApiErrorMessage(err, "Bulk action failed"));
     } finally {
       setLoading("");
     }

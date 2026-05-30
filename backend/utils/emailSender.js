@@ -1,5 +1,11 @@
 const nodemailer = require("nodemailer");
 
+const maskEmail = (email = "") => {
+  const [name, domain] = email.split("@");
+  if (!name || !domain) return "unknown-email";
+  return `${name.slice(0, 2)}***@${domain}`;
+};
+
 const buildHtmlTemplate = ({ employee, salary }) => `
   <!doctype html>
   <html>
@@ -62,15 +68,23 @@ const sendSalaryEmail = async ({ employee, salary, pdfPath }) => {
   }
 
   const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS
     }
   });
 
+  console.log(
+    `Preparing salary email for ${employee.employeeId} to ${maskEmail(employee.email)} using sender ${maskEmail(process.env.EMAIL_USER)}`
+  );
+
+  await transporter.verify();
+
   await transporter.sendMail({
-    from: process.env.EMAIL_USER,
+    from: `"HR Team" <${process.env.EMAIL_USER}>`,
     to: employee.email,
     subject: `Salary Slip for ${salary.month} ${salary.year}`,
     text: `Dear ${employee.name},\n\nPlease find attached your salary slip for ${salary.month} ${salary.year}.\n\nRegards,\nHR Team`,

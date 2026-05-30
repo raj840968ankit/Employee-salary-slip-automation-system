@@ -2,6 +2,7 @@ import { useState } from "react";
 import AlertBox from "../components/AlertBox";
 import FileUploadForm from "../components/FileUploadForm";
 import api from "../services/api";
+import getApiErrorMessage from "../utils/errorMessage";
 
 function SalaryUpload() {
   const [loading, setLoading] = useState(false);
@@ -23,7 +24,7 @@ function SalaryUpload() {
       setResult(response.data);
       setMessage(`Preview ready: ${response.data.previewCount} valid records and ${response.data.rejectedCount} rejected rows.`);
     } catch (err) {
-      setError(err.response?.data?.message || "Salary upload failed");
+      setError(getApiErrorMessage(err, "Salary upload failed"));
     } finally {
       setLoading(false);
     }
@@ -41,7 +42,7 @@ function SalaryUpload() {
       setMessage(`Saved ${response.data.savedCount} salary records successfully.`);
       setResult(null);
     } catch (err) {
-      setError(err.response?.data?.message || "Unable to save salary records");
+      setError(getApiErrorMessage(err, "Unable to save salary records"));
     } finally {
       setSaving(false);
     }

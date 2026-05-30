@@ -1,6 +1,7 @@
 const path = require("path");
 const express = require("express");
 const cors = require("cors");
+const morgan = require("morgan");
 require("dotenv").config();
 
 const employeeRoutes = require("./routes/employeeRoutes");
@@ -8,7 +9,25 @@ const salaryRoutes = require("./routes/salaryRoutes");
 
 const app = express();
 
-app.use(cors({ origin: process.env.CLIENT_URL || "*" }));
+app.set("trust proxy", 1);
+
+const allowedOrigins = (process.env.CLIENT_URL || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || !allowedOrigins.length || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`CORS blocked request from ${origin}`));
+    }
+  })
+);
+app.use(morgan(":method :url :status :res[content-length] - :response-time ms"));
 app.use(express.json());
 app.use("/generated-pdfs", express.static(path.join(__dirname, "generated-pdfs")));
 

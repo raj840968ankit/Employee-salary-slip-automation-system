@@ -5,6 +5,7 @@ import EmployeeUpload from "./pages/EmployeeUpload";
 import SalaryUpload from "./pages/SalaryUpload";
 import SalaryRecords from "./pages/SalaryRecords";
 import BulkActions from "./pages/BulkActions";
+import GlobalLoader from "./components/GlobalLoader";
 
 const navItems = [
   { to: "/", label: "Dashboard", icon: BarChart3 },
@@ -18,6 +19,7 @@ function App() {
   return (
     <BrowserRouter>
       <div className="app-shell">
+        <GlobalLoader />
         <aside className="sidebar">
           <div className="brand-block">
             <div className="brand-mark">SS</div>
