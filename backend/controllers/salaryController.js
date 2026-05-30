@@ -265,9 +265,17 @@ const downloadAllPdfs = async (req, res, next) => {
         );
       }
 
-      pdfFiles.push({
-        path: absolutePdfPath,
-        name: path.basename(currentSalary.pdfPath)
+      if (fs.existsSync(absolutePdfPath)) {
+        pdfFiles.push({
+          path: absolutePdfPath,
+          name: path.basename(currentSalary.pdfPath)
+        });
+      }
+    }
+
+    if (!pdfFiles.length) {
+      return res.status(400).json({
+        message: "No PDF files found to download."
       });
     }
 
@@ -275,7 +283,20 @@ const downloadAllPdfs = async (req, res, next) => {
     res.setHeader("Content-Disposition", "attachment; filename=salary-slips.zip");
 
     const archive = archiver("zip", { zlib: { level: 9 } });
-    archive.on("error", next);
+
+    archive.on("error", (err) => {
+      console.error("Archiver error:", err);
+      if (!res.headersSent) {
+        res.status(500).json({ message: "Failed to create zip file" });
+      }
+    });
+
+    archive.on("warning", (err) => {
+      if (err.code !== "ENOENT") {
+        console.warn("Archiver warning:", err);
+      }
+    });
+
     archive.pipe(res);
 
     pdfFiles.forEach((file) => {
@@ -284,6 +305,7 @@ const downloadAllPdfs = async (req, res, next) => {
 
     await archive.finalize();
   } catch (error) {
+    console.error("Download error:", error);
     next(error);
   }
 };
