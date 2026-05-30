@@ -67,21 +67,38 @@ const sendSalaryEmail = async ({ employee, salary, pdfPath }) => {
     throw new Error("EMAIL_USER and EMAIL_PASS are required to send emails");
   }
 
+  const smtpHost = process.env.EMAIL_HOST || "smtp.gmail.com";
+  const smtpPort = Number(process.env.EMAIL_PORT || 587);
+  const smtpSecure = String(process.env.EMAIL_SECURE || "false") === "true";
+
   const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true,
+    host: smtpHost,
+    port: smtpPort,
+    secure: smtpSecure,
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS
-    }
+    },
+    connectionTimeout: 30000,
+    greetingTimeout: 30000,
+    socketTimeout: 30000
   });
 
   console.log(
-    `Preparing salary email for ${employee.employeeId} to ${maskEmail(employee.email)} using sender ${maskEmail(process.env.EMAIL_USER)}`
+    `Preparing salary email for ${employee.employeeId} to ${maskEmail(employee.email)} using ${smtpHost}:${smtpPort} as ${maskEmail(process.env.EMAIL_USER)}`
   );
 
-  await transporter.verify();
+  try {
+    await transporter.verify();
+  } catch (error) {
+    if (error.code === "ETIMEDOUT" || error.command === "CONN") {
+      throw new Error(
+        `SMTP connection timed out while connecting to ${smtpHost}:${smtpPort}. Check Render environment variables, Gmail app password, and try EMAIL_PORT=587 with EMAIL_SECURE=false.`
+      );
+    }
+
+    throw error;
+  }
 
   await transporter.sendMail({
     from: `"HR Team" <${process.env.EMAIL_USER}>`,

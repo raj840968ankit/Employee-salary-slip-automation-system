@@ -86,6 +86,9 @@ PORT=5000
 MONGODB_URI=your_mongodb_atlas_connection_string
 EMAIL_USER=your_gmail_address
 EMAIL_PASS=your_gmail_app_password
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_SECURE=false
 CLIENT_URL=http://localhost:5173
 ```
 
@@ -302,6 +305,9 @@ PORT=5000
 MONGODB_URI=your_mongodb_atlas_connection_string
 EMAIL_USER=your_gmail_address
 EMAIL_PASS=your_gmail_app_password
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_SECURE=false
 CLIENT_URL=https://your-vercel-frontend-url.vercel.app
 ```
 
@@ -367,6 +373,7 @@ Add screenshots here after running the project:
 
 - Gmail requires an app password for SMTP if two-factor authentication is enabled.
 - On Render, add `EMAIL_USER` and `EMAIL_PASS` in the service Environment tab. `EMAIL_PASS` should be a Gmail app password, not your normal Gmail password.
+- For Gmail SMTP on Render, use `EMAIL_HOST=smtp.gmail.com`, `EMAIL_PORT=587`, and `EMAIL_SECURE=false`.
 - Backend request logs use Morgan and appear in the Render Logs tab.
 - Generated PDFs are saved inside `backend/generated-pdfs`.
 - Uploaded files are temporarily stored in `backend/uploads` and deleted after parsing.
