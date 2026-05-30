@@ -1,4 +1,6 @@
 const fs = require("fs");
+const path = require("path");
+const archiver = require("archiver");
 const Employee = require("../models/Employee");
 const Salary = require("../models/Salary");
 const { parseSpreadsheet, validateColumns } = require("../utils/fileParser");
@@ -219,7 +221,68 @@ const generateAllPdfs = async (req, res, next) => {
       }
     }
 
-    res.json({ message: "Bulk PDF generation completed", results });
+    res.json({ message: "Bulk PDFs generated.", results });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const downloadAllPdfs = async (req, res, next) => {
+  try {
+    await removeOrphanSalaryRecords();
+
+    const salaries = await Salary.find();
+
+    if (!salaries.length) {
+      return res.status(400).json({
+        message: "Can't download PDFs because no salary records exist."
+      });
+    }
+
+    const pdfFiles = [];
+
+    for (const salary of salaries) {
+      let currentSalary = salary;
+
+      if (!currentSalary.pdfPath) {
+        currentSalary = await generatePdfForSalary(currentSalary._id);
+      }
+
+      let absolutePdfPath = path.join(
+        __dirname,
+        "..",
+        "generated-pdfs",
+        path.basename(currentSalary.pdfPath)
+      );
+
+      if (!fs.existsSync(absolutePdfPath)) {
+        currentSalary = await generatePdfForSalary(currentSalary._id);
+        absolutePdfPath = path.join(
+          __dirname,
+          "..",
+          "generated-pdfs",
+          path.basename(currentSalary.pdfPath)
+        );
+      }
+
+      pdfFiles.push({
+        path: absolutePdfPath,
+        name: path.basename(currentSalary.pdfPath)
+      });
+    }
+
+    res.setHeader("Content-Type", "application/zip");
+    res.setHeader("Content-Disposition", "attachment; filename=salary-slips.zip");
+
+    const archive = archiver("zip", { zlib: { level: 9 } });
+    archive.on("error", next);
+    archive.pipe(res);
+
+    pdfFiles.forEach((file) => {
+      archive.file(file.path, { name: file.name });
+    });
+
+    await archive.finalize();
   } catch (error) {
     next(error);
   }
@@ -261,5 +324,6 @@ module.exports = {
   generatePdf,
   sendEmail,
   generateAllPdfs,
+  downloadAllPdfs,
   sendAllEmails
 };

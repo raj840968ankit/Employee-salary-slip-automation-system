@@ -33,7 +33,7 @@ function SalaryRecords() {
       setMessage("PDF generated successfully");
       await loadRecords();
     } catch (err) {
-      setError(getApiErrorMessage(err, "PDF generation failed"));
+      setError(await getApiErrorMessage(err, "PDF generation failed"));
     } finally {
       setLoadingId("");
     }
@@ -48,7 +48,7 @@ function SalaryRecords() {
       setMessage("Email sent successfully");
       await loadRecords();
     } catch (err) {
-      setError(getApiErrorMessage(err, "Email sending failed"));
+      setError(await getApiErrorMessage(err, "Email sending failed"));
     } finally {
       setLoadingId("");
     }

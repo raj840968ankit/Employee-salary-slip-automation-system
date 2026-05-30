@@ -24,7 +24,7 @@ function EmployeeUpload() {
       setResult(response.data);
       setMessage(`Preview ready: ${response.data.previewCount} valid employees and ${response.data.rejectedCount} rejected rows.`);
     } catch (err) {
-      setError(getApiErrorMessage(err, "Employee upload failed"));
+      setError(await getApiErrorMessage(err, "Employee upload failed"));
     } finally {
       setLoading(false);
     }
@@ -42,7 +42,7 @@ function EmployeeUpload() {
       setMessage(`Saved ${response.data.savedCount} employee records successfully.`);
       setResult(null);
     } catch (err) {
-      setError(getApiErrorMessage(err, "Unable to save employee records"));
+      setError(await getApiErrorMessage(err, "Unable to save employee records"));
     } finally {
       setSaving(false);
     }
