@@ -1,4 +1,5 @@
 const path = require("path");
+const fs = require("fs");
 const Employee = require("../models/Employee");
 const Salary = require("../models/Salary");
 const generateSalarySlip = require("../utils/pdfGenerator");
@@ -38,12 +39,16 @@ const generatePdfForSalary = async (salaryId) => {
 const sendEmailForSalary = async (salaryId) => {
   const { salary, employee } = await findSalaryWithEmployee(salaryId);
 
-  if (!salary.pdfPath) {
-    await generatePdfForSalary(salary._id);
-  }
+  let refreshedSalary = salary;
+  let absolutePdfPath = salary.pdfPath
+    ? path.join(__dirname, "..", "generated-pdfs", path.basename(salary.pdfPath))
+    : "";
 
-  const refreshedSalary = await Salary.findById(salaryId);
-  const absolutePdfPath = path.join(__dirname, "..", "generated-pdfs", path.basename(refreshedSalary.pdfPath));
+  if (!salary.pdfPath || !fs.existsSync(absolutePdfPath)) {
+    await generatePdfForSalary(salary._id);
+    refreshedSalary = await Salary.findById(salaryId);
+    absolutePdfPath = path.join(__dirname, "..", "generated-pdfs", path.basename(refreshedSalary.pdfPath));
+  }
 
   try {
     await sendSalaryEmail({ employee, salary: refreshedSalary, pdfPath: absolutePdfPath });
