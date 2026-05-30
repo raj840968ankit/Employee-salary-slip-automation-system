@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const fs = require("fs");
 
 const maskEmail = (email = "") => {
   const [name, domain] = email.split("@");
@@ -62,7 +63,55 @@ const buildHtmlTemplate = ({ employee, salary }) => `
   </html>
 `;
 
-const sendSalaryEmail = async ({ employee, salary, pdfPath }) => {
+const buildEmailPayload = ({ employee, salary }) => ({
+  to: employee.email,
+  subject: `Salary Slip for ${salary.month} ${salary.year}`,
+  text: `Dear ${employee.name},\n\nPlease find attached your salary slip for ${salary.month} ${salary.year}.\n\nRegards,\nHR Team`,
+  html: buildHtmlTemplate({ employee, salary })
+});
+
+const sendWithResend = async ({ employee, salary, pdfPath }) => {
+  if (!process.env.RESEND_API_KEY) {
+    throw new Error("RESEND_API_KEY is required when EMAIL_PROVIDER=resend");
+  }
+
+  const fromEmail = process.env.RESEND_FROM_EMAIL || "HR Team <onboarding@resend.dev>";
+  const emailPayload = buildEmailPayload({ employee, salary });
+  const attachmentContent = fs.readFileSync(pdfPath).toString("base64");
+
+  console.log(`Sending salary email with Resend API to ${maskEmail(employee.email)} from ${fromEmail}`);
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      from: fromEmail,
+      to: [emailPayload.to],
+      subject: emailPayload.subject,
+      text: emailPayload.text,
+      html: emailPayload.html,
+      attachments: [
+        {
+          filename: `Salary-Slip-${salary.month}-${salary.year}.pdf`,
+          content: attachmentContent
+        }
+      ]
+    })
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || result.error || "Resend email API failed");
+  }
+
+  return result;
+};
+
+const sendWithSmtp = async ({ employee, salary, pdfPath }) => {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
     throw new Error("EMAIL_USER and EMAIL_PASS are required to send emails");
   }
@@ -100,12 +149,14 @@ const sendSalaryEmail = async ({ employee, salary, pdfPath }) => {
     throw error;
   }
 
-  await transporter.sendMail({
+  const emailPayload = buildEmailPayload({ employee, salary });
+
+  return transporter.sendMail({
     from: `"HR Team" <${process.env.EMAIL_USER}>`,
-    to: employee.email,
-    subject: `Salary Slip for ${salary.month} ${salary.year}`,
-    text: `Dear ${employee.name},\n\nPlease find attached your salary slip for ${salary.month} ${salary.year}.\n\nRegards,\nHR Team`,
-    html: buildHtmlTemplate({ employee, salary }),
+    to: emailPayload.to,
+    subject: emailPayload.subject,
+    text: emailPayload.text,
+    html: emailPayload.html,
     attachments: [
       {
         filename: `Salary-Slip-${salary.month}-${salary.year}.pdf`,
@@ -113,6 +164,14 @@ const sendSalaryEmail = async ({ employee, salary, pdfPath }) => {
       }
     ]
   });
+};
+
+const sendSalaryEmail = async ({ employee, salary, pdfPath }) => {
+  if (process.env.EMAIL_PROVIDER === "resend") {
+    return sendWithResend({ employee, salary, pdfPath });
+  }
+
+  return sendWithSmtp({ employee, salary, pdfPath });
 };
 
 module.exports = sendSalaryEmail;

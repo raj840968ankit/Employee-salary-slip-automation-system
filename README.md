@@ -89,6 +89,9 @@ EMAIL_PASS=your_gmail_app_password
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_SECURE=false
+EMAIL_PROVIDER=smtp
+RESEND_API_KEY=
+RESEND_FROM_EMAIL=HR Team <onboarding@resend.dev>
 CLIENT_URL=http://localhost:5173
 ```
 
@@ -308,6 +311,9 @@ EMAIL_PASS=your_gmail_app_password
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_SECURE=false
+EMAIL_PROVIDER=resend
+RESEND_API_KEY=your_resend_api_key
+RESEND_FROM_EMAIL=HR Team <onboarding@resend.dev>
 CLIENT_URL=https://your-vercel-frontend-url.vercel.app
 ```
 
@@ -374,6 +380,7 @@ Add screenshots here after running the project:
 - Gmail requires an app password for SMTP if two-factor authentication is enabled.
 - On Render, add `EMAIL_USER` and `EMAIL_PASS` in the service Environment tab. `EMAIL_PASS` should be a Gmail app password, not your normal Gmail password.
 - For Gmail SMTP on Render, use `EMAIL_HOST=smtp.gmail.com`, `EMAIL_PORT=587`, and `EMAIL_SECURE=false`.
+- Render free web services block outbound SMTP ports, so production email should use `EMAIL_PROVIDER=resend` with `RESEND_API_KEY`.
 - Backend request logs use Morgan and appear in the Render Logs tab.
 - Generated PDFs are saved inside `backend/generated-pdfs`.
 - Uploaded files are temporarily stored in `backend/uploads` and deleted after parsing.
