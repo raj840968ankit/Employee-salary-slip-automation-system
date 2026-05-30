@@ -1,11 +1,13 @@
 const fs = require("fs");
 const path = require("path");
-const archiver = require("archiver");
+const archiverModule = require("archiver");
 const Employee = require("../models/Employee");
 const Salary = require("../models/Salary");
 const { parseSpreadsheet, validateColumns } = require("../utils/fileParser");
 const { generatePdfForSalary, sendEmailForSalary } = require("../services/salaryService");
 const { removeOrphanSalaryRecords } = require("../services/dataCleanupService");
+
+const archiver = typeof archiverModule === "function" ? archiverModule : archiverModule.default;
 
 const requiredSalaryColumns = [
   "employeeId",
