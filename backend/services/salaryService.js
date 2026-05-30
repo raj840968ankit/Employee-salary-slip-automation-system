@@ -46,7 +46,7 @@ const sendEmailForSalary = async (salaryId) => {
   const absolutePdfPath = path.join(__dirname, "..", "generated-pdfs", path.basename(refreshedSalary.pdfPath));
 
   try {
-    await sendSalaryEmail({ employee, salary: refreshedSalary, pdfPath: absolutePdfPath });
+    sendSalaryEmail({ employee, salary: refreshedSalary, pdfPath: absolutePdfPath });
     refreshedSalary.emailStatus = "Sent";
     await refreshedSalary.save();
     return refreshedSalary;
